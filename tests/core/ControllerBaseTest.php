@@ -413,5 +413,49 @@ class ControllerBaseTest extends UnitTestCase
         $this->assertEquals('TEST', $result);
     }
 
+    public function testGetLanguageFromHeaderNoLanguage()
+    {
+        //mock request
+        $request = Mockery::mock('Request');
+        $request->shouldReceive('getHeaders')->andReturn([]);
+
+        //register request
+        $this->di->set('request', $request, true);
+
+        //create class
+        $class = new ControllerBase();
+
+        $result = $this->callMethod(
+            $class,
+            'getLanguageFromHeader',
+            []
+        );
+
+        $this->assertEquals('en', $result);
+    }
+
+    public function testGetLanguageFromHeaderHaveLanguage()
+    {
+        //mock request
+        $request = Mockery::mock('Request');
+        $request->shouldReceive('getHeaders')->andReturn([
+            'Language' => 'th'
+        ]);
+
+        //register request
+        $this->di->set('request', $request, true);
+
+        //create class
+        $class = new ControllerBase();
+
+        $result = $this->callMethod(
+            $class,
+            'getLanguageFromHeader',
+            []
+        );
+
+        $this->assertEquals('th', $result);
+    }
+
     //------- end: Test function ---------//
 }

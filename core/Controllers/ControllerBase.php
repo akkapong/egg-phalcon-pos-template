@@ -92,7 +92,7 @@ class ControllerBase extends Controller
     }
 
     //Method for response success data
-    protected function response($encoder, $data, $limit=null, $offset=null, $total=null)
+    protected function response($encoder, $data, $limit=null, $offset=null, $total=null, $encodeMethod='encodeData')
     {
         //create pagination object
         $paginateObj = $this->createPaginateObj($limit, $offset, $total);
@@ -101,10 +101,11 @@ class ControllerBase extends Controller
         $datas       = [];
         if (empty($paginateObj)) {
             //no paginate
-            $datas = $encoder->encodeData($data);
+            $datas = $encoder->{$encodeMethod}($data);
+            //encodeIdentifiers
         } else {
             //with paginate
-            $datas = $encoder->withMeta($paginateObj)->encodeData($data);
+            $datas = $encoder->withMeta($paginateObj)->{$encodeMethod}($data);
         }
         
 
@@ -158,4 +159,15 @@ class ControllerBase extends Controller
 
         return $this->output($datas, $errors['code']);
     }  
+
+    // Method for get language from header
+    protected function getLanguageFromHeader()
+    {
+        $headers = $this->request->getHeaders();
+
+        if (isset($headers['Language'])) {
+            return $headers['Language'];
+        }
+        return "en";
+    }
 }
