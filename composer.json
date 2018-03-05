@@ -1,22 +1,17 @@
 {
     "name": "egg-phalcon-boilerplate",
     "description": "egg-phalcon-boilerplate",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "keywords": [
         "phalcon",
         "framework"
     ],
     "type": "library",
-    "license": "BSD-3",
-    "homepage": "http://www.phalconphp.com",
+    "license": "EGG",
     "authors" : [
         {
-            "name" : "Andres Gutierrez",
-            "email" : "andres@phalconphp.com"
-        },
-        {
-            "name" : "Mark Garrett",
-            "email" : "mark@moderndeveloperllc.com"
+            "name" : "Akkapong Kajornwongwattana",
+            "email" : "akk.ohm@gmail.com"
         }
     ],
     "require": {
