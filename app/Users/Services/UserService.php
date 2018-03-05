@@ -13,12 +13,12 @@ class UserService extends UserRepositories
     //==== Start: Support method ====//
 
     //Method for create filter for check duplicate
-    protected function createFilterForCheckDup($makroId, $contentType, $contentId)
+    protected function createFilterForCheckDup(string $username, string $refType, string $refId): array
     {
         return [
-            'makro_id'     => $makroId,
-            'content_type' => $contentType,
-            'content_id'   => $contentId,
+            'username' => $username,
+            'ref_type' => $refType,
+            'ref_id'   => $refId,
         ];
     }
 
@@ -27,7 +27,7 @@ class UserService extends UserRepositories
 
     //==== Stat: Main method ====//
     //Method for get data by filter
-    public function getUser($params)
+    public function getUser(array $params, ?int $limit, ?int $offset): array
     {
         //Define output
         $outputs = [
@@ -39,9 +39,9 @@ class UserService extends UserRepositories
             //create filter
             $users         = $this->getDataByParams($params);
 
-            if (isset($params['limit'])) {
+            if (!empty($limit)) {
                 //get total record
-                $outputs['total'] = $coupons[1];
+                $outputs['total'] = $users[1];
             }
 
             $outputs['data'] = $users[0];
@@ -56,7 +56,7 @@ class UserService extends UserRepositories
     }
 
     //Method for get data by id
-    public function getUserDetail($id)
+    public function getUserDetail(string $id): array
     {
         //Define output
         $outputs = [
@@ -87,7 +87,7 @@ class UserService extends UserRepositories
 
 
     //Method for insert data
-    public function manageUser($params)
+    public function manageUser(array $params): array
     {
         //Define output
         $output = [
@@ -97,7 +97,7 @@ class UserService extends UserRepositories
         ];
 
         //Check Duplicate
-        $filters = $this->createFilterForCheckDup($params['makro_id'], $params['content_type'], $params['content_id']);
+        $filters = $this->createFilterForCheckDup($params['username'], $params['ref_type'], $params['ref_id']);
         $isDups  = $this->checkDuplicate($filters);
         
         if (!$isDups[0])
@@ -136,7 +136,7 @@ class UserService extends UserRepositories
 
 
     //Method for delete data
-    public function deleteUser($id)
+    public function deleteUser(string $id): array
     {
         //Define output
         $output = [

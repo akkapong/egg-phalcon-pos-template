@@ -29,7 +29,7 @@ class UserController extends ControllerBase
     private $createRule = [
         [
             'type'   => 'required',
-            'fields' => ['makro_id', 'content_type', 'content_id'],
+            'fields' => ['username', 'ref_type', 'ref_id'],
         ],
     ];
 
@@ -58,11 +58,14 @@ class UserController extends ControllerBase
         //get input
         $params = $this->getUrlParams();
 
+        $limit  = (isset($params['limit']))?$params['limit']:null;
+        $offset = (isset($params['offset']))?$params['offset']:null;
+
         //validate input
         //TODO: add validate here
 
         //get data in service
-        $result = $this->userService->getUser($params);
+        $result = $this->userService->getUser($params, $limit, $offset);
 
         if (!$result['success']) {
             //process error
@@ -74,8 +77,7 @@ class UserController extends ControllerBase
         //return data
         $encoder = $this->createEncoder($this->modelName, $this->schemaName);
 
-        $limit  = (isset($params['limit']))?$params['limit']:null;
-        $offset = (isset($params['offset']))?$params['offset']:null;
+        //get total
         $total  = (isset($result['total']))?$result['total']:null;
 
         return $this->response($encoder, $result['data'], $limit, $offset, $total);

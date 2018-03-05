@@ -6,11 +6,10 @@ use Users\Collections\UserCollection;
 
 class UserRepositories extends CollectionRepositories {
 
-
     //==== Start: Define variable ====//
     public $module         = 'users';
     public $collectionName = 'UserCollection';
-    public $allowFilter    = ['makro_id', 'content_type', 'content_id', 'firstname', 'lastname', 'type_id', 'type_detail', 'store_id'];
+    public $allowFilter    = ['username', 'password', 'ref_type', 'ref_id', 'status', 'created_at', 'updated_at'];
     public $model;
     //==== Start: Define variable ====//
 

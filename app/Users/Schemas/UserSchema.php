@@ -37,14 +37,13 @@ class UserSchema extends SchemaProvider
     {
         /** @var User $user */
         return [
-            'makro_id'     => $user->makro_id,
-            'content_type' => $user->content_type,
-            'content_id'   => $user->content_id,
-            'first_name'   => $user->firstname,
-            'last_name'    => $user->lastname,
-            'type_id'      => $user->type_id,
-            'type_detail'  => $user->type_detail,
-            'store_id'     => $user->store_id,
+            'username'   => $user->username,
+            'password'   => $user->password,
+            'ref_type'   => $user->ref_type,
+            'ref_id'     => $user->ref_id,
+            'status'     => $user->status,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
         ];
     }
 }
