@@ -52,7 +52,7 @@ class ControllerBase extends Controller
     }
 
 
-    protected function responseData($data, $status_code = 200, $message = 'OK')
+    protected function responseData(string $data, int $status_code = 200, string $message = 'OK')
     {
         $this->response->setContentType("application/json", "UTF-8");
         $this->response->setStatusCode($status_code, $message);
@@ -61,7 +61,7 @@ class ControllerBase extends Controller
         return $this->response;
     }
 
-    protected function output($output=[], $code=200)
+    protected function output(array $output=[], int $code=200)
     {
         return $this->responseData(json_decode($output, true), $code);
     }
