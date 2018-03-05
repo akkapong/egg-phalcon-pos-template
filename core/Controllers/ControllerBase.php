@@ -61,7 +61,7 @@ class ControllerBase extends Controller
         return $this->response;
     }
 
-    protected function output(string $output="{}", int $code=200)
+    public function output(string $output="{}", int $code=200)
     {
         return $this->responseData(json_decode($output, true), $code);
     }

@@ -29,7 +29,14 @@ class UserController extends ControllerBase
     private $createRule = [
         [
             'type'   => 'required',
-            'fields' => ['username', 'ref_type', 'ref_id'],
+            'fields' => ['username', 'ref_type'],
+        ],
+    ];
+
+    private $updateRule = [
+        [
+            'type'   => 'required',
+            'fields' => ['id', 'username', 'ref_type'],
         ],
     ];
 
@@ -38,6 +45,20 @@ class UserController extends ControllerBase
             'type'   => 'required',
             'fields' => ['id'],
         ],
+    ];
+
+    private $userLogin = [
+        [
+            'type'   => 'required',
+            'fields' => ['username', 'password', 'ref_type'],
+        ]
+    ];
+
+    private $userChangePass = [
+        [
+            'type'   => 'required',
+            'fields' => ['id', 'old', 'new'],
+        ]
     ];
     //==== End: Define variable ====//
 
@@ -85,7 +106,7 @@ class UserController extends ControllerBase
         
     }
 
-    public function getUserdetailAction($id)
+    public function getUserdetailAction(string $id)
     {
         //get data in service
         $result = $this->userService->getUserDetail($id);
@@ -123,8 +144,8 @@ class UserController extends ControllerBase
             return $this->responseError($params['validate_error'], '/users');
         }
 
-        //add member data by input
-        $result = $this->userService->manageUser($params);
+        //CREATE data by input
+        $result = $this->userService->createUser($params);
 
         //Check response error
         if (!$result['success'])
@@ -139,7 +160,42 @@ class UserController extends ControllerBase
         return $this->response($encoder, $result['data']);
     }
 
-    public function deleteUserAction($id)
+    public function putUserAction(string $id)
+    {
+        //get input
+        $inputs       = $this->getPostInput();
+
+        $inputs['id'] = $id;
+        
+        //define default
+        $default      = [];
+
+        // Validate input
+        $params = $this->myValidate->validateApi($this->updateRule, $default, $inputs);
+
+        if (isset($params['validate_error']))
+        {
+            //Validate error
+            return $this->responseError($params['validate_error'], '/users');
+        }
+
+        //UPDATE data by input
+        $result = $this->userService->updateUser($params);
+
+        //Check response error
+        if (!$result['success'])
+        {
+            //process error
+            return $this->responseError($result['message'], '/users');
+        }
+
+        //return data
+        $encoder = $this->createEncoder($this->modelName, $this->schemaName);
+
+        return $this->response($encoder, $result['data']);
+    }
+
+    public function deleteUserAction(string $id)
     {
         //update member data
         $result  = $this->userService->deleteUser($id);
@@ -154,6 +210,78 @@ class UserController extends ControllerBase
         //return data
         $encoder = $this->createEncoder($this->modelName, $this->schemaName);
 
+        return $this->response($encoder, $result['data']);
+    }
+
+    //Method for user login
+    public function postLoginAction()
+    {
+        //get input
+        $inputs = $this->getPostInput();
+
+        //define default
+        $default = [
+            'status' => 'active'
+        ];
+
+        // Validate input
+        $params = $this->myValidate->validateApi($this->userLogin, $default, $inputs);
+
+        if (isset($params['validate_error']))
+        {
+            //Validate error
+            return $this->responseError($params['validate_error'], '/users');
+        }
+
+        //process user login
+        $result = $this->userService->checkLogin($params);
+
+        //Check response error
+        if (!$result['success'])
+        {
+            //process error
+            return $this->responseError($result['message'], '/users');
+        }
+
+         //clear cache witch prefix
+        // $this->cacheService->deleteCacheByPrefix($this->service);
+
+        return $this->output(json_encode($result));
+    }
+
+    //Method for change password
+    public function putChangepasswordAction(string $id)
+    {
+        //get input
+        $inputs       = $this->getPostInput();
+        $inputs['id'] = $id;
+
+        //define default
+        $default = [];
+
+        // Validate input
+        $params = $this->myValidate->validateApi($this->userChangePass, $default, $inputs);
+
+        if (isset($params['validate_error']))
+        {
+            //Validate error
+            return $this->responseError($params['validate_error'], '/users');
+        }
+
+        //update user data
+        $result   = $this->userService->changePassword($params['id'], $params['old'], $params['new']);
+
+        //Check response error
+        if (!$result['success'])
+        {
+            //process error
+            return $this->responseError($result['message'], '/users');
+        }
+
+        //clear cache witch prefix
+        // $this->cacheService->deleteCacheByPrefix($this->service);
+
+        $encoder = $this->createEncoder($this->modelName, $this->schemaName);
         return $this->response($encoder, $result['data']);
     }
     //==== End: Main method ====//

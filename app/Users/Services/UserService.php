@@ -2,6 +2,7 @@
 namespace Users\Services;
 
 use Users\Repositories\UserRepositories;
+use Users\Collections\UserCollection;
 
 class UserService extends UserRepositories
 {
@@ -13,14 +14,29 @@ class UserService extends UserRepositories
     //==== Start: Support method ====//
 
     //Method for create filter for check duplicate
-    protected function createFilterForCheckDup(string $username, string $refType, string $refId): array
+    protected function createFilterForCheckDup(string $username, string $refType): array
     {
         return [
             'username' => $username,
             'ref_type' => $refType,
-            'ref_id'   => $refId,
         ];
     }
+
+    //Method for encrypt password
+    protected function encryptPassword($password)
+    {
+        if (!empty($password)) {
+            return $this->security->hash($password);
+        }
+        return "";
+    }
+
+    //Method for check password
+    protected function checkPassword($passInDb, $passCheck)
+    {
+        return $this->security->checkHash($passCheck, $passInDb);
+    }
+
 
     //==== End: Support method ====//
 
@@ -87,7 +103,7 @@ class UserService extends UserRepositories
 
 
     //Method for insert data
-    public function manageUser(array $params): array
+    public function createUser(array $params): array
     {
         //Define output
         $output = [
@@ -97,34 +113,79 @@ class UserService extends UserRepositories
         ];
 
         //Check Duplicate
-        $filters = $this->createFilterForCheckDup($params['username'], $params['ref_type'], $params['ref_id']);
+        $filters = $this->createFilterForCheckDup($params['username'], $params['ref_type']);
         $isDups  = $this->checkDuplicate($filters);
+
+        if ($isDups[0]) {
+            //Cannot insert
+            $output['success'] = false;
+            $output['message'] = 'dataDuplicate';
+            return $output;
+        } 
+
+        //get current date
+        $current = date('Y-m-d H:i:s');
         
-        if (!$isDups[0])
-        {
-            //insert
-            $res = $this->insertData($params);
+        //default date
+        $params['created_at'] = $current;
+        $params['updated_at'] = $current;
 
-            if (!$res)
-            {
-                //Cannot insert
-                $output['success'] = false;
-                $output['message'] = 'insertError';
-                return $output;
-            } 
-        }
-        else
-        {
-            //update
-            $res = $this->updateData($isDups[1], $params);
+        //encrypt password
+        $params['password']   = $this->encryptPassword($params['password']);
 
-            if (!$res)
-            {
-                //Cannot insert
-                $output['success'] = false;
-                $output['message'] = 'updateError';
-                return $output;
-            }
+        //insert
+        $res = $this->insertData($params);
+
+        if (!$res)
+        {
+            //Cannot insert
+            $output['success'] = false;
+            $output['message'] = 'insertError';
+            return $output;
+        } 
+
+        
+        //add config data
+        $output['data'] = $res;
+
+        return $output;
+    }
+
+    //Method for update data
+    public function updateUser(array $params): array
+    {
+        //Define output
+        $output = [
+            'success' => true,
+            'message' => '',
+            'data'    => '',
+        ];
+
+        //Check Duplicate
+        $filters = $this->createFilterForCheckDup($params['username'], $params['ref_type']);
+        $isDups  = $this->checkDuplicate($filters);
+
+        if ( $isDups[0] && ((string)$isDups[1]->_id != $params['id']) ) {
+            //Cannot insert
+            $output['success'] = false;
+            $output['message'] = 'dataDuplicate';
+            return $output;
+        } 
+
+        //default date
+        $params['updated_at'] = date('Y-m-d H:i:s');
+        //remove password
+        unset($params['password']);
+        
+        //update
+        $res = $this->updateData($isDups[1], $params);
+
+        if (!$res)
+        {
+            //Cannot insert
+            $output['success'] = false;
+            $output['message'] = 'updateError';
+            return $output;
         }
 
         
@@ -168,6 +229,96 @@ class UserService extends UserRepositories
         }
 
         //get insert id
+        $output['data'] = $res;
+
+        return $output;
+    }
+
+    //Method for check login
+    public function checkLogin(array $params) :array
+    {
+        //Define output
+        $output = [
+            'success' => true,
+            'message' => '',
+        ];
+
+        //keep password
+        $password = $params['password'];
+
+        //remove password before get user
+        unset($params['password']);
+
+        //get user 
+        $users = $this->getDataByParams($params)[0];
+
+        if (empty($users[0])) {
+            //No Data
+            $output['success'] = false;
+            $output['message'] = 'dataNotFound';
+            return $output;
+        }
+
+        //validate login
+        $res = $this->checkPassword($users[0]->password, $password);
+
+        if (!$res)
+        {
+            //Cannot insert
+            $output['success'] = false;
+            $output['message'] = 'loginFail';
+            return $output;
+        }
+
+        return $output;
+    }
+
+    //Method for change password
+    public function changePassword(string $id, string $oldPass, string $newPass) :array
+    {
+        //Define output
+        $output = [
+            'success' => true,
+            'message' => '',
+            'data'    => '',
+        ];
+
+        //get user data
+        $user = $this->getDataById($id);
+        
+        if (empty($user)) {
+            //No Data
+            $output['success'] = false;
+            $output['message'] = 'dataNotFound';
+            return $output;
+        }
+
+        //check old password
+        if (!$this->checkPassword($user->password, $oldPass)) {
+            //old password not match
+            $output['success'] = false;
+            $output['message'] = 'oldPasswordWrong';
+            return $output;
+        }
+
+        
+        //Define parameter for update
+        $params = [
+            'password'   => $this->encryptPassword($newPass), //encrypt password
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        //update password
+        $res = $this->updateData($user, $params);
+
+        if (!$res)
+        {
+            //Cannot insert
+            $output['success'] = false;
+            $output['message'] = 'updateError';
+            return $output;
+        }
+
         $output['data'] = $res;
 
         return $output;
