@@ -171,6 +171,9 @@ class UserService extends UserRepositories
             $output['message'] = 'dataDuplicate';
             return $output;
         } 
+        
+        //get data by id
+        $user  = $this->getDataById($params['id']);
 
         //default date
         $params['updated_at'] = date('Y-m-d H:i:s');
@@ -178,7 +181,7 @@ class UserService extends UserRepositories
         unset($params['password']);
         
         //update
-        $res = $this->updateData($isDups[1], $params);
+        $res = $this->updateData($user, $params);
 
         if (!$res)
         {
