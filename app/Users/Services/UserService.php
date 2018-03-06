@@ -161,8 +161,15 @@ class UserService extends UserRepositories
             'data'    => '',
         ];
 
+        //get data by id
+        $user  = $this->getDataById($params['id']);
+
+        //get value for check duplicate
+        $username = isset($params['username'])? $params['username'] : $user->username;
+        $refType  = isset($params['ref_type'])? $params['ref_type'] : $user->ref_type;
+
         //Check Duplicate
-        $filters = $this->createFilterForCheckDup($params['username'], $params['ref_type']);
+        $filters = $this->createFilterForCheckDup($username, $refType);
         $isDups  = $this->checkDuplicate($filters);
 
         if ( $isDups[0] && ((string)$isDups[1]->_id != $params['id']) ) {
@@ -172,9 +179,6 @@ class UserService extends UserRepositories
             return $output;
         } 
         
-        //get data by id
-        $user  = $this->getDataById($params['id']);
-
         //default date
         $params['updated_at'] = date('Y-m-d H:i:s');
         //remove password

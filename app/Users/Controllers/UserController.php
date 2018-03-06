@@ -36,7 +36,7 @@ class UserController extends ControllerBase
     private $updateRule = [
         [
             'type'   => 'required',
-            'fields' => ['id', 'username', 'ref_type'],
+            'fields' => ['id'],
         ],
     ];
 
