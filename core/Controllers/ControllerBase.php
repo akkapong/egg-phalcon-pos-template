@@ -36,7 +36,7 @@ class ControllerBase extends Controller
     }
 
     //Method for get post paramerter
-    public function getPostInput()
+    protected function getPostInput()
     {
         $rawInput = $this->request->getRawBody();
         //convert to array
@@ -61,7 +61,7 @@ class ControllerBase extends Controller
         return $this->response;
     }
 
-    public function output(string $output="{}", int $code=200)
+    protected function output(string $output="{}", int $code=200)
     {
         return $this->responseData(json_decode($output, true), $code);
     }
