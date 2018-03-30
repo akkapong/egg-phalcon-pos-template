@@ -9,23 +9,7 @@ $loader = new Loader();
  */
 $loader->registerNamespaces([
     'Phalcon' => BASE_DIR . '/../../vendor/phalcon/incubator/Library/',
-    'Users'   => APP_DIR . '/Users',
-    
-    // 'Core\Models'       => APP_DIR . '/../core/Models/',
-    // 'Core\Controllers'  => APP_DIR . '/../core/Controllers/',
-    // 'Core\Collections'  => APP_DIR . '/../core/Collections/',
-    // 'Core\Repositories' => APP_DIR . '/./core/Repositories/',
-    // 'Core\Services'     => APP_DIR . '/../core/Services/',
-    
-    // 'Users\Models'       => APP_DIR . '/Users/Models/',
-    // 'Users\Controllers'  => APP_DIR . '/Users/Controllers/',
-    // 'Users\Collections'  => APP_DIR . '/Users/Collections/',
-    // 'Users\Repositories' => APP_DIR . '/Users/Repositories/',
-    // 'Users\Services'     => APP_DIR . '/Users/Services/',
-
-    // 'Users'             => APP_DIR . '/Users',
-
-    // 'Core\Libraries'       => APP_DIR . '/library/',
+/** [New Namespace For Module] **/
 ]);
 
 $loader->register();
