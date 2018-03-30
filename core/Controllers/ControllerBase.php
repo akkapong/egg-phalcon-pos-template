@@ -9,6 +9,8 @@ use Neomerx\JsonApi\Encoder\EncoderOptions;
 use Neomerx\JsonApi\Document\Error;
 use Neomerx\JsonApi\Document\Link;
 
+use Neomerx\JsonApi\Encoder\Parameters\EncodingParameters;
+
 /**
  * ControllerBase
  * This is the base controller for all controllers in the application
@@ -91,21 +93,44 @@ class ControllerBase extends Controller
         return $paginateObj;
     }
 
+    //Method for get fitler data
+    protected function getFilterResponse()
+    {
+        $inputs = $this->getUrlParams();
+
+        //Define output
+        $filters = isset($inputs['fields'])? $inputs['fields']: [];
+
+        foreach ($filters as $key => $filter) {
+            $filters[$key] = explode(',', $filter);
+        }
+
+        return $filters;
+    }
+
     //Method for response success data
     protected function response($encoder, $data, $limit=null, $offset=null, $total=null, $encodeMethod='encodeData')
     {
         //create pagination object
         $paginateObj = $this->createPaginateObj($limit, $offset, $total);
+
+        //set option for filter
+        //TODO: sort set in here!!
+        $options = new EncodingParameters(
+            null,
+            $this->getFilterResponse()
+
+        );
         
         //Define output data
         $datas       = [];
         if (empty($paginateObj)) {
             //no paginate
-            $datas = $encoder->{$encodeMethod}($data);
+            $datas = $encoder->{$encodeMethod}($data, $options);
             //encodeIdentifiers
         } else {
             //with paginate
-            $datas = $encoder->withMeta($paginateObj)->{$encodeMethod}($data);
+            $datas = $encoder->withMeta($paginateObj)->{$encodeMethod}($data, $options);
         }
         
 
